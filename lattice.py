@@ -5,10 +5,12 @@ Created on Thu Nov 14 03:12:19 2024
 
 @author: star
 """
+import random
+
 class Lattice(object):
     """A single atomic sheet with sizes: nx and ny; onsite potential energy: eps; hopping: t; magnetic flux 1/Q;"""
 
-    def __init__(self, Nx, Ny, eps, t, Q):
+    def __init__(self, Nx, Ny, eps, t, Q, w):
         """
         Args:
             Nx (int  ): number of sites on x-direction
@@ -16,27 +18,44 @@ class Lattice(object):
             eps(float): onsite energy
             t  (float): nearest neighbor hopping potential
             1/Q(int  ): magnetic flux
+            w  (float): impurity width
         """
         self.Nx  = Nx                             
         self.Ny  = Ny        
         self.eps = eps                           
         self.t   = t                              
         self.Q   = Q
+        self.w   = w
         
-    def getEps(self):
+    def getEps(self): 
         return self.eps
+    def setEps(self,eps):
+        self.eps = eps
     
     def getT(self):
         return self.t
+    def setT(self, t):
+        self.t = t
     
     def getNx(self):
         return self.Nx
+    def setNx(self, Nx):
+        self.Nx = Nx
     
     def getNy(self):
         return self.Ny
+    def setNy(self, Ny):
+        self.Ny = Ny
     
     def getQ(self):
         return self.Q
+    def setQ(self, Q):
+        self.Q = Q
+    
+    def getW(self):
+        return self.w
+    def setW(self, w):
+        self.w = w
     
     def sites(self):
         """
@@ -48,14 +67,24 @@ class Lattice(object):
         """
         return self.Nx * self.Ny
     
+    def impurityPotentials(self):
+        if self.w != 0:
+            p = []
+            start = self.eps - self.w/2
+            for i in range(self.sites()):
+                p.append(random.random() * self.w + start)
+        return p
+    
     def __str__(self):
         return "This lattice model has a size: "            \
             + str(self.getNx()) + " x " + str(self.getNy()) \
             + ", eps = "                                    \
             + str(self.getEps())                            \
-            + ", t = " + str(self.getT()) + ", Q = " + str(self.getQ())  
+            + ", t = " + str(self.getT()) + ", Q = " + str(self.getQ())  \
+            + ", w = " + str(self.getW())
 
+    
 # Test instance 
-smallSheet = Lattice(10, 10, 0, 1, 10)
-print (smallSheet)  
- 
+smallSheet = Lattice(10, 10, 0, 1, 10, 1)
+print (smallSheet)
+  
