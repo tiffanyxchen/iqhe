@@ -1,3 +1,4 @@
+
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
@@ -17,23 +18,10 @@ class Hamiltonian(object):
     The Hamiltonian includes onsite energy, hopping energy, finite lattice size, and magnetic flux.
     """
     def __init__(self, lat):
-        self.lat           = lat
-        self.matrix        = self.setMatrix      (               )   
-        self.eigenvals     = self.eigenvalues    (self.matrix    )
-        self.matrix_imp    = self.setMatrix_imp  (               )   
-        self.eigenvals_imp = self.eigenvalues    (self.matrix_imp)
-        self.eDegeneracies = self.degeneracies()[0]
-        self.nDegeneracies = self.degeneracies()[1]
-        self.levels        = len(self.eDegeneracies)
+        self.matrix = self.setMatrix(lat)
 
     def getMatrix(self):
         return self.matrix
-    
-    def getEigenvals(self):
-        return self.eigenvals
-    
-    def getLevels(self):
-        return self.levels
     
     def onsite(self, eps, N, mat):
         # On site energy eps on the diagonal
@@ -41,10 +29,11 @@ class Hamiltonian(object):
             mat[i][i] = eps  
         return mat
     
-    def onsiteImpurities(self, mat):
+    def onsiteImpurities(self, mat, lat):
         # On site energy eps on the diagonal
+        p = lat.impurityPotentials()
         for i in range(mat.shape[0]):
-            mat[i][i] = self.lat.impurityPotentials()[i]
+            mat[i][i] = p[i]
         return mat
 
     def xHopping(self, t, Ny, N, mat):        
@@ -92,26 +81,26 @@ class Hamiltonian(object):
             mat[(c + 1) * Ny - 1] [x] = t * phase
         return mat
     
-    def setMatrix(self):
+    def setMatrix(self, lat):
         
-        N   = self.lat.sites ()
+        N   = lat.sites ()
         mat = np.full((N,N),0j)
         
-        eps = self.lat.getEps()
-        #w   = self.lat.getW  ()
-        t   = self.lat.getT  ()
-        
-        if eps != 0:
-            mat = self.onsite(eps, N, mat)
-
-        #if w != 0:
-        #    mat = self.onsiteImpurites(eps, N, mat, w)
+        eps = lat.getEps()
+        w   = lat.getW  ()
+        t   = lat.getT  ()
+ 
+        if w != 0:
+            mat = self.onsiteImpurities(mat, lat)
+        else:
+            if eps != 0:
+                mat = self.onsite(eps, N, mat)
 
         
         if t != 0:
-            Nx    = self.lat.getNx() 
-            Ny    = self.lat.getNy()
-            phi   = 1/self.lat.getQ()
+            Nx    = lat.getNx() 
+            Ny    = lat.getNy()
+            phi   = 1/lat.getQ()
             theda = 2 * pi * phi
             
             mat   = self.xHopping (t, Ny, N,         mat)
@@ -120,96 +109,15 @@ class Hamiltonian(object):
             mat   = self.yBoundary(t, Nx, Ny, theda, mat)
         
         return mat
-    
-    
-    def setMatrix_imp(self):
-        w   = self.lat.getW()
-        mat = self.matrix    
-        if w != 0:
-            mat = self.onsiteImpurities(mat)
-        return mat
-       
         
-    def eigenvalues(self, matrix):
-        """Calculates the eigenvalues of the H"""
-        
-        eigenvalues = np.linalg.eigvals(matrix)
-        realE = (np.round(eigenvalues.real,2))
-        realE_sorted = sorted(realE)
-        return realE_sorted
-                                                                                                                                                                         
-    def degeneracies(self):
-        #count energy levels and degeneracies
-        eigenvals = self.getEigenvals()
-        N         = len(self.eigenvals)
-        
-        nLevels = 0
-        energyLevels  = []
-        degeneracies  = []
-
-        c = 0
-        while (c < N):
-            print( str(nLevels) + "st energy level is: " + str(eigenvals[c]))
-            energyLevels.insert(nLevels, eigenvals[c])
-            
-            i = c + 1
-            numDeg = 1
-            while (i < N and eigenvals[c] == eigenvals[i]):
-                numDeg += 1
-                i += 1
-                
-            print("  Its degeneracy is: " + str(numDeg))
-            degeneracies.insert(nLevels, numDeg)
-            print("    ")
-            
-            if (i < N and eigenvals[c] != eigenvals[i]):
-                    nLevels = nLevels + 1
-            c = i
-        return energyLevels, degeneracies
-
-    
-    def traceEigenvals(self):
-        return sum(self.eigenvals)
-
-    def printTrace(self):
-        print("Adding eigenvalues: " + str(np.round(self.traceEigenvals(), 1)))
-    
-    def totEigenstates(self):
-        return sum(self.nDegeneracies)
-    
-    def printTotEigenstates(self):
-        print("\nAdding density of states: " + str(self.totEigenstates()))
-        
-    
-    def __str__(self):
-        description = (
-            f"\nThe {self.lat.getNx()} x {self.lat.getNy()} square lattice has \n"
-            f"On site energy = {self.lat.getEps()}; t = {self.lat.getT()}; theta = 2*pi/{self.lat.getQ()}\n\n"
-            f"Its Hamiltonian is represented by: the {self.matrix.shape[0]} x {self.matrix.shape[0]} matrix with B-field:\n\n"
-            f"The eigenvalues of the matrix with B-field:\n{self.getEigenvals()}\n\n"
-            f"# of unique energy levels: {len(self.eDegeneracies)}.\n\nThese are:\n{self.eDegeneracies}\n\n"
-            f"The corresponding degeneracies are:\n{self.nDegeneracies}\n"
-                        )
-        return description
-
-
-    def graphEnergyLevels(self):
-        
-        num_bins = self.levels * 12
-        plt.hist(self.eigenvals    , num_bins, facecolor='black', alpha=0.8, range=[-8, 8])
-        plt.hist(self.eigenvals_imp, num_bins, facecolor='blue' , alpha=0.4, range=[-8, 8])
-        plt.ylim(0, 1)  # Set the y-axis range here
-
-        plt.xlabel('Energy Levels')
-        plt.ylabel('Degeneracy')
-        title = f"{self.lat.getNx()}x{self.lat.getNy()} Square Lattice: eps={self.lat.getEps()}, t={self.lat.getT()}, Q={self.lat.getQ()}, w={self.lat.getW()}"
-        plt.title(title)
-        plt.show()
-        plt.savefig(title)
-
-    
+ 
 # Example Usage        
-bigger        = Lattice(10, 10, 0, 2, 10, 2)
-biggerSquareH = Hamiltonian(bigger)
-biggerSquareH.graphEnergyLevels()
-print (biggerSquareH)
+bigger   = Lattice(10, 10, 0, 1, 10, 1)
+squareH  = Hamiltonian(bigger)
+#biggerSquareH.graphEnergyLevels()
+print (squareH)
+'''
+small = Lattice(2,2,0,1,2,1)
+smallSquareH = Hamiltonian(small)
+print(smallSquareH.getMatrix())
+'''
