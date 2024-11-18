@@ -8,6 +8,7 @@ Created on Fri Nov 15 17:29:28 2024
 import numpy as np
 import matplotlib.pyplot as plt
 from lattice import Lattice
+from lattice import DoppedLattice
 from hamiltonian import Hamiltonian
 
 class Analysis(object):
@@ -107,10 +108,10 @@ class Analysis(object):
 
     
 # Example Usage        
-bigger        = Lattice(10, 10, 0, 2, 10, 0)
+bigger        = Lattice(10, 10, 0, 2, 10)
 biggerSquareH = Hamiltonian(bigger)
 
-biggerD        = Lattice(10, 10, 0, 2, 10, 6)
+biggerD        = DoppedLattice(10, 10, 0, 2, 10, 2)
 biggerSquareHD = Hamiltonian(biggerD)
 
 result = Analysis(biggerSquareH.getMatrix(), biggerSquareHD.getMatrix())

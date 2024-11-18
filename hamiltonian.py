@@ -11,6 +11,7 @@ from  math import pi
 from cmath import e
 import matplotlib.pyplot as plt
 from lattice import Lattice
+from lattice import DoppedLattice
 
 class Hamiltonian(object):
     """ 
@@ -87,7 +88,12 @@ class Hamiltonian(object):
         mat = np.full((N,N),0j)
         
         eps = lat.getEps()
-        w   = lat.getW  ()
+        
+        if isinstance(lat, DoppedLattice):
+            w = lat.getW  ()
+        else:
+            w = 0
+            
         t   = lat.getT  ()
  
         if w != 0:
@@ -112,7 +118,7 @@ class Hamiltonian(object):
         
  
 # Example Usage        
-bigger   = Lattice(10, 10, 0, 1, 10, 1)
+bigger   = DoppedLattice(10, 10, 0, 1, 10, 1)
 squareH  = Hamiltonian(bigger)
 #biggerSquareH.graphEnergyLevels()
 print (squareH)

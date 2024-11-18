@@ -10,7 +10,7 @@ import random
 class Lattice(object):
     """A single atomic sheet with sizes: nx and ny; onsite potential energy: eps; hopping: t; magnetic flux 1/Q;"""
 
-    def __init__(self, Nx, Ny, eps, t, Q, w):
+    def __init__(self, Nx, Ny, eps, t, Q):
         """
         Args:
             Nx (int  ): number of sites on x-direction
@@ -25,8 +25,7 @@ class Lattice(object):
         self.eps = eps                           
         self.t   = t                              
         self.Q   = Q
-        self.w   = w
-        
+         
     def getEps(self): 
         return self.eps
     def setEps(self,eps):
@@ -51,12 +50,7 @@ class Lattice(object):
         return self.Q
     def setQ(self, Q):
         self.Q = Q
-    
-    def getW(self):
-        return self.w
-    def setW(self, w):
-        self.w = w
-    
+
     def sites(self):
         """
         Calculates the total number of sites on the Lattice sheet. Called by the 
@@ -67,24 +61,46 @@ class Lattice(object):
         """
         return self.Nx * self.Ny
     
+    def __str__(self):
+        return "This lattice model has a size: "            \
+            + self.description()
+    
+    def description(self):
+        return str(self.getNx()) + " x " + str(self.getNy()) \
+            + ", eps = "                                    \
+            + str(self.getEps())                            \
+            + ", t = " + str(self.getT()) + ", Q = " + str(self.getQ())
+
+
+class DoppedLattice(Lattice):
+    tag = 1
+    def __init__(self, Nx, Ny, eps, t, Q, w):    
+        Lattice.__init__(self, Nx, Ny, eps, t, Q)
+        self.w = w
+        self.dID = DoppedLattice.tag
+        DoppedLattice.tag += 1
+        
+    def getW(self):
+        return self.w
+    def setW(self, w):
+        self.w = w    
+        
     def impurityPotentials(self):
         if self.w != 0:
             p = []
             start = self.eps - self.w/2
             for i in range(self.sites()):
                 p.append(random.random() * self.w + start)
-        return p
+        return p    
     
     def __str__(self):
-        return "This lattice model has a size: "            \
-            + str(self.getNx()) + " x " + str(self.getNy()) \
-            + ", eps = "                                    \
-            + str(self.getEps())                            \
-            + ", t = " + str(self.getT()) + ", Q = " + str(self.getQ())  \
+        return "This dopped model has a size: "      \
+            + self.description()                     \
             + ", w = " + str(self.getW())
 
-    
+        
 # Test instance 
-smallSheet = Lattice(10, 10, 0, 1, 10, 1)
+smallSheet = DoppedLattice(10, 10, 0, 1, 10, 1)
 print (smallSheet)
+#print (smallSheet.impurityPotentials())
   
