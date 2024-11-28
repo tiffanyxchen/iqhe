@@ -121,7 +121,6 @@ class Hamiltonian(object):
 bigger   = DoppedLattice(10, 10, 0, 1, 10, 1)
 squareH  = Hamiltonian(bigger)
 #biggerSquareH.graphEnergyLevels()
-print (squareH)
 '''
 small = Lattice(2,2,0,1,2,1)
 smallSquareH = Hamiltonian(small)

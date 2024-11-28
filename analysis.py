@@ -103,15 +103,15 @@ class Analysis(object):
         plt.ylabel('Degeneracy')
         title = f"{lat.getNx()}x{lat.getNy()} Square Lattice: eps={lat.getEps()}, t={lat.getT()}, Q={lat.getQ()}, w={lat.getW()}"
         plt.title(title)
+        plt.savefig(title)       
         plt.show()
-        plt.savefig(title)
-
+ 
     
 # Example Usage        
 bigger        = Lattice(10, 10, 0, 2, 10)
 biggerSquareH = Hamiltonian(bigger)
 
-biggerD        = DoppedLattice(10, 10, 0, 2, 10, 2)
+biggerD        = DoppedLattice(10, 10, 0, 2, 10, 4)
 biggerSquareHD = Hamiltonian(biggerD)
 
 result = Analysis(biggerSquareH.getMatrix(), biggerSquareHD.getMatrix())
